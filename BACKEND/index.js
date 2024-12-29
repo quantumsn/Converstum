@@ -1,16 +1,30 @@
 import "dotenv/config";
-import express from "express";
-import cors from "cors";
+import { Server } from "socket.io";
+import { createServer } from "http";
 
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.send("Hello");
+const httpServer = createServer();
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  },
 });
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server Listening on port ${process.env.PORT}`);
+io.on("connection", (socket) => {
+  console.log("Socket ID : ", socket.id);
+
+  socket.on("msg", (data) => {
+    console.log("Data from client", data);
+    io.emit("msg", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+const port = process.env.PORT;
+httpServer.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
