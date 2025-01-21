@@ -1,19 +1,33 @@
 import "dotenv/config";
 import { Server } from "socket.io";
 import { createServer } from "http";
+import express from "express";
+import cors from "cors";
 
-const httpServer = createServer();
+const app = express();
+const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
+    origin: process.env.FRONTEND_URL,
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
 });
 
-io.on("connection", (socket) => {
-  console.log("Socket ID : ", socket.id);
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "Hello" });
+});
+
+io.on("connection", (socket) => {
+  console.log("New client connected:", socket.id);
   socket.on("msg", (data) => {
     console.log("Data from client", data);
     io.emit("msg", data);
@@ -24,7 +38,11 @@ io.on("connection", (socket) => {
   });
 });
 
-const port = process.env.PORT;
-httpServer.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+const port = process.env.PORT || 3000;
+httpServer
+  .listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  })
+  .on("error", (err) => {
+    console.error("Error starting server:", err);
+  });
