@@ -3,6 +3,22 @@ import { Server } from "socket.io";
 import { createServer } from "http";
 import express from "express";
 import cors from "cors";
+import jwt from "jsonwebtoken";
+import initializeSocketIO from "./socket.js";
+import mongoose from "mongoose";
+import userRoutes from "./routes/user.routes.js";
+
+const dbUrl = process.env.ATLASDB_URL;
+
+main()
+  .then((res) => {
+    console.log("Connected to DB");
+  })
+  .catch((err) => console.log(err));
+
+async function main() {
+  await mongoose.connect(dbUrl);
+}
 
 const app = express();
 const httpServer = createServer(app);
@@ -14,6 +30,7 @@ const io = new Server(httpServer, {
   },
 });
 
+app.use(express.json());
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
@@ -22,21 +39,9 @@ app.use(
   })
 );
 
-app.get("/", (req, res) => {
-  res.status(200).json({ message: "Hello" });
-});
+initializeSocketIO(io);
 
-io.on("connection", (socket) => {
-  console.log("New client connected:", socket.id);
-  socket.on("msg", (data) => {
-    console.log("Data from client", data);
-    io.emit("msg", data);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-});
+app.use("/api/user", userRoutes);
 
 const port = process.env.PORT || 3000;
 httpServer

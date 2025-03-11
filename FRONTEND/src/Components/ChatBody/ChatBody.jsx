@@ -1,17 +1,38 @@
-export default function ChatBody() {
+import { useEffect, useRef } from "react";
+
+export default function ChatBody({ messages, socketId }) {
+  const scrollToEnd = useRef(null);
+
+  useEffect(() => {
+    scrollToEnd.current.scrollTop = scrollToEnd.current.scrollHeight;
+  }, [messages]);
+
   return (
-    <div className="flex flex-1 flex-col overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent">
+    <div
+      ref={scrollToEnd}
+      className="flex flex-1 flex-col overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-800 scrollbar-track-transparent"
+    >
       <div className="flex-1 p-6">
-        <div className="flex items-end justify-end">
-          <div className="bg-emerald-800 p-3 rounded-ee-none rounded-lg">
-            <p className="text-sm">Hello, how can I help you?</p>
-          </div>
-        </div>
-        <div className="flex items-start justify-start">
-          <div className="bg-customColor p-3 rounded-ss-none rounded-lg">
-            <p className="text-sm">Hello, how can I help you?</p>
-          </div>
-        </div>
+        {messages?.length > 0
+          ? messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`flex items-end mb-0.5 ${
+                  msg.id == socketId ? "justify-end" : "justify-start"
+                }`}
+              >
+                <div
+                  className={`p-3 ${
+                    msg.id == socketId
+                      ? "rounded-ee-none bg-emerald-800"
+                      : "rounded-ss-none bg-customColor"
+                  } max-w-lg break-words rounded-lg`}
+                >
+                  <p className="text-sm">{msg.msg}</p>
+                </div>
+              </div>
+            ))
+          : null}
       </div>
     </div>
   );
