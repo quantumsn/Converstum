@@ -24,7 +24,7 @@ export default function SignUp() {
       console.log(res.data.message);
       navigate("/");
     } catch (err) {
-      console.log(err.response.data.message);
+      console.error(err.response.data.error);
     }
     setUserData({ username: "", email: "", password: "" });
   };

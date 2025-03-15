@@ -4,9 +4,11 @@ import { createServer } from "http";
 import express from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
+import CustomError from "./utilit/customError.js";
 import initializeSocketIO from "./socket.js";
 import mongoose from "mongoose";
 import userRoutes from "./routes/user.routes.js";
+import contactRoutes from "./routes/contact.routes.js";
 
 const dbUrl = process.env.ATLASDB_URL;
 
@@ -42,6 +44,18 @@ app.use(
 initializeSocketIO(io);
 
 app.use("/api/user", userRoutes);
+app.use("/api/contacts", contactRoutes);
+
+app.all("/api/*", (req, res, next) => {
+  throw new CustomError("Page Not Found", 404);
+});
+
+app.use((err, req, res, next) => {
+  let { statusCode = 500, message = "Something went Wrong" } = err;
+  res.status(statusCode).json({
+    error: message,
+  });
+});
 
 const port = process.env.PORT || 3000;
 httpServer

@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 import { hashPassword, checkPassword } from "../utilit/passwordHash&Check.js";
+import CustomError from "../utilit/customError.js";
 
 const registerUser = async (req, res) => {
   const { email, username, password } = req.body;
@@ -47,12 +48,10 @@ const loginUser = async (req, res) => {
       });
       res.status(200).json({ message: "Welcome Back Bhoiya" });
     } else {
-      res.status(401).json({ message: "Password is incorrect" });
+      throw new CustomError("Password is incorrect", 401);
     }
   } else {
-    res
-      .status(401)
-      .json({ message: "Username is incorrect or User is not exist !" });
+    throw new CustomError("Username is incorrect or User is not exist !", 401);
   }
 };
 

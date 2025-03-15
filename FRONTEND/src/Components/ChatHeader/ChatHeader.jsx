@@ -2,21 +2,20 @@ import CloseIcon from "@mui/icons-material/Close";
 import { useChatClose } from "../../Context/ChatCloseProvidor";
 
 export default function ChatHeader() {
-  const { setChatClose } = useChatClose();
+  const { closeChat, chatUser } = useChatClose();
 
   const handleCloseChat = () => {
-    setChatClose(false);
+    closeChat();
   };
 
   return (
     <div className="flex justify-between p-4 bg-customColor">
       <div className="flex">
-        <img
-          className=" rounded-full h-12 w-12"
-          src="https://xsgames.co/randomusers/avatar.php?g=male"
-        />
+        <p className="bg-green-500 rounded-full w-12 h-12 text-center text-4xl ">
+          {chatUser[0].toUpperCase()}
+        </p>
         <div className="flex flex-col ml-4">
-          <h4 className="text-lg font-semibold">Unknown</h4>
+          <h4 className="text-lg font-semibold">{chatUser}</h4>
           <p className="text-sm text-gray-400">Offline</p>
         </div>
       </div>

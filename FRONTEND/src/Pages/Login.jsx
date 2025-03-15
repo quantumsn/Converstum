@@ -19,7 +19,7 @@ export default function Login() {
       console.log(res.data.message);
       navigate("/");
     } catch (err) {
-      console.error(err.response.data.message);
+      console.error(err.response.data.error);
     }
     setUserData({ username: "", password: "" });
   };

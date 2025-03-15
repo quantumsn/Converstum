@@ -2,10 +2,13 @@ import { ChatHeader, ChatBody, InputBox } from "../Components";
 import { useState } from "react";
 import socket from "../socket";
 import { useEffect } from "react";
+import { useChatClose } from "../Context/ChatCloseProvidor";
 
 export default function Chat() {
   const [msg, setmsg] = useState("");
   const [messages, setMessages] = useState([]);
+
+  let { roomId } = useChatClose();
 
   useEffect(() => {
     socket.on("msg", (data) => {
@@ -19,7 +22,7 @@ export default function Chat() {
 
   const sendMsg = (e) => {
     e.preventDefault();
-    socket.emit("msg", msg);
+    socket.emit("msg", { msg, roomId });
     setmsg("");
   };
 
