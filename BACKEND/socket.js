@@ -15,13 +15,15 @@ const initializeSocketIO = (io) => {
       let roomId = [userId, friendID].sort().join("-");
       socket.join(roomId);
       console.log(`${username} joined room: ${roomId}`);
-      console.log("Rooms:", socket.rooms);
     });
 
     socket.on("msg", (data) => {
       console.log("Data from client", data);
-      // io.emit("msg", { msg: data, id: socket.id });
-      io.to(data.roomId).emit("msg", { msg: data.msg, id: socket.id });
+      io.to(data.roomId).emit("msg", {
+        content: data.content,
+        sender: data.sender,
+        receiver: data.receiver,
+      });
     });
 
     socket.on("disconnect", () => {

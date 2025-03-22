@@ -9,6 +9,8 @@ import initializeSocketIO from "./socket.js";
 import mongoose from "mongoose";
 import userRoutes from "./routes/user.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
+import chatRoutes from "./routes/chat.routes.js";
+import messageRoutes from "./routes/message.routes.js";
 
 const dbUrl = process.env.ATLASDB_URL;
 
@@ -43,6 +45,8 @@ app.use(
 
 initializeSocketIO(io);
 
+app.use("/api/chat", chatRoutes);
+app.use("/api/messages", messageRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/contacts", contactRoutes);
 

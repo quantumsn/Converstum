@@ -6,7 +6,7 @@ export default function ContactBar({ username, lastMsg }) {
       </p>
       <div>
         <h2 className="text-lg font-semibold">{username}</h2>
-        <p className="text-gray-400">Last message</p>
+        <p className="text-gray-400">{lastMsg}</p>
       </div>
     </div>
   );

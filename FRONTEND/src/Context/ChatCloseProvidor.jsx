@@ -3,13 +3,14 @@ import React, { createContext, useState, useContext } from "react";
 const ChatCloseContext = createContext();
 
 export const ChatCloseProvider = ({ children }) => {
+  const [userId, setUserId] = useState(null);
   const [chatClose, setChatClose] = useState(true);
   const [chatUser, setChatUser] = useState(null);
   const [roomId, setRoomId] = useState(null);
 
-  const openChat = (username, roomId) => {
+  const openChat = (chatUserData, roomId) => {
     setChatClose(false);
-    setChatUser(username);
+    setChatUser(chatUserData);
     setRoomId(roomId);
   };
 
@@ -21,7 +22,15 @@ export const ChatCloseProvider = ({ children }) => {
 
   return (
     <ChatCloseContext.Provider
-      value={{ chatClose, openChat, closeChat, chatUser, roomId }}
+      value={{
+        chatClose,
+        openChat,
+        userId,
+        setUserId,
+        closeChat,
+        chatUser,
+        roomId,
+      }}
     >
       {children}
     </ChatCloseContext.Provider>

@@ -7,16 +7,15 @@ import socket from "../socket";
 
 export default function Contacts() {
   const [contacts, setContacts] = useState(null);
-  const [userId, setUserId] = useState(null);
 
-  const { openChat } = useChatClose();
+  const { openChat, userId, setUserId } = useChatClose();
 
   useEffect(() => {
     const getData = async () => {
       try {
         let res = await api.get("contacts");
 
-        setContacts(res.data.contacts);
+        setContacts(res.data.chats);
         setUserId(res.data.user._id);
       } catch (err) {
         console.log(err);
@@ -25,10 +24,10 @@ export default function Contacts() {
     getData();
   }, []);
 
-  const handleChatOpen = (username, contactID) => {
-    let roomId = [userId, contactID].sort().join("-");
-    openChat(username, roomId);
-    socket.emit("joinRoom", { userId: userId, friendID: contactID });
+  const handleChatOpen = (contact) => {
+    let roomId = [userId, contact._id].sort().join("-");
+    openChat(contact, roomId);
+    socket.emit("joinRoom", { userId: userId, friendID: contact._id });
   };
 
   return (
@@ -46,10 +45,13 @@ export default function Contacts() {
         {contacts != null &&
           contacts.map((contact) => (
             <div
-              key={contact._id}
-              onClick={() => handleChatOpen(contact.username, contact._id)}
+              key={contact.contact._id}
+              onClick={() => handleChatOpen(contact.contact)}
             >
-              <ContactBar username={contact.username} />
+              <ContactBar
+                username={contact.contact.username}
+                lastMsg={contact.lastMessage}
+              />
             </div>
           ))}
       </div>

@@ -1,7 +1,10 @@
 import { useEffect, useRef } from "react";
+import { useChatClose } from "../../Context/ChatCloseProvidor";
 
 export default function ChatBody({ messages, socketId }) {
   const scrollToEnd = useRef(null);
+
+  const { userId } = useChatClose();
 
   useEffect(() => {
     scrollToEnd.current.scrollTop = scrollToEnd.current.scrollHeight;
@@ -18,17 +21,17 @@ export default function ChatBody({ messages, socketId }) {
               <div
                 key={idx}
                 className={`flex items-end mb-0.5 ${
-                  msg.id == socketId ? "justify-end" : "justify-start"
+                  msg.sender == userId ? "justify-end" : "justify-start"
                 }`}
               >
                 <div
                   className={`p-3 ${
-                    msg.id == socketId
+                    msg.sender == userId
                       ? "rounded-ee-none bg-emerald-800"
                       : "rounded-ss-none bg-customColor"
                   } max-w-lg break-words rounded-lg`}
                 >
-                  <p className="text-sm">{msg.msg}</p>
+                  <p className="text-sm">{msg.content}</p>
                 </div>
               </div>
             ))

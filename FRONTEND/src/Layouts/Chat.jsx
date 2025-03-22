@@ -3,12 +3,13 @@ import { useState } from "react";
 import socket from "../socket";
 import { useEffect } from "react";
 import { useChatClose } from "../Context/ChatCloseProvidor";
+import api from "../api";
 
 export default function Chat() {
   const [msg, setmsg] = useState("");
   const [messages, setMessages] = useState([]);
 
-  let { roomId } = useChatClose();
+  let { roomId, userId, chatUser } = useChatClose();
 
   useEffect(() => {
     socket.on("msg", (data) => {
@@ -20,9 +21,52 @@ export default function Chat() {
     };
   }, []);
 
-  const sendMsg = (e) => {
+  useEffect(() => {
+    if (roomId != null) {
+      api
+        .get(`messages/${roomId}`)
+        .then((res) => {
+          setMessages(res.data);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+    setMessages([]);
+  }, [roomId]);
+
+  const sendMsg = async (e) => {
     e.preventDefault();
-    socket.emit("msg", { msg, roomId });
+    if (msg != "" || msg != null) {
+      socket.emit("msg", {
+        content: msg,
+        sender: userId,
+        receiver: chatUser._id,
+        roomId,
+      });
+
+      try {
+        let res = await api.post(`messages/${roomId}`, {
+          content: msg,
+          sender: userId,
+          receiver: chatUser._id,
+        });
+        console.log(res.data);
+      } catch (err) {
+        console.error(err.response.data);
+      }
+
+      try {
+        let res = await api.post(`chat/${roomId}`, {
+          participants: [userId, chatUser._id],
+          lastMessage: msg,
+        });
+        console.log(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
     setmsg("");
   };
 
