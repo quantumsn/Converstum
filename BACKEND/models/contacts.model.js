@@ -3,22 +3,19 @@ import mongoose from "mongoose";
 
 const contactSchema = new Schema(
   {
-    owener: {
+    owner: {
       type: Schema.Types.ObjectId,
       ref: "User",
     },
-    contacts: [
-      {
-        nickname: {
-          type: String,
-          required: true,
-        },
-        contactId: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-        },
-      },
-    ],
+    nickname: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
   },
   { timestamps: true }
 );

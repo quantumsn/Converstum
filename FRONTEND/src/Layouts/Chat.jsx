@@ -43,6 +43,7 @@ export default function Chat() {
         sender: userId,
         receiver: chatUser._id,
         roomId,
+        createdAt: new Date().toISOString(),
       });
 
       try {
@@ -73,7 +74,7 @@ export default function Chat() {
   return (
     <div className="h-screen w-4/6 flex flex-col bg-gradient-to-r from-blue-800 via-gray-950 to-purple-800 text-white">
       <ChatHeader />
-      <ChatBody messages={messages} socketId={socket.id} />
+      <ChatBody chatMessages={messages} socketId={socket.id} />
       <InputBox
         msg={msg}
         handleMsgInputBox={(msg) => setmsg(msg)}

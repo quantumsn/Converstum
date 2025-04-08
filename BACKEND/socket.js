@@ -23,6 +23,7 @@ const initializeSocketIO = (io) => {
         content: data.content,
         sender: data.sender,
         receiver: data.receiver,
+        createdAt: data.createdAt,
       });
     });
 

@@ -4,9 +4,11 @@ import { SearchBox, ContactBar } from "../Components";
 import AddIcon from "@mui/icons-material/Add";
 import { useChatClose } from "../Context/ChatCloseProvidor";
 import socket from "../socket";
+import { AddContactDialog } from "../Components";
 
 export default function Contacts() {
   const [contacts, setContacts] = useState(null);
+  const [addDialog, setaddDialog] = useState(false);
 
   const { openChat, userId, setUserId } = useChatClose();
 
@@ -35,12 +37,19 @@ export default function Contacts() {
       <div className="p-4 sticky top-0 bg-gray-900 ">
         <div className="flex justify-between items-center">
           <h2 className="text-4xl m-2 text-gray-100 font-bold">Chats</h2>
-          <button className="bg-customColor p-2 rounded-full">
+          <button
+            onClick={() => setaddDialog(true)}
+            className="bg-customColor p-2 rounded-full"
+          >
             <AddIcon />
           </button>
         </div>
         <SearchBox />
       </div>
+      <AddContactDialog
+        open={addDialog}
+        handleClose={() => setaddDialog(false)}
+      />
       <div className="flex flex-col gap-4 mt-4">
         {contacts != null &&
           contacts.map((contact) => (
