@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useChatClose } from "../../Context/ChatCloseProvidor";
 import momemt from "moment";
 
-export default function ChatBody({ chatMessages, socketId }) {
+export default function ChatBody({ chatMessages }) {
   const [messages, setMessages] = useState([]);
   const scrollToEnd = useRef(null);
 

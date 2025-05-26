@@ -45,7 +45,7 @@ app.use(
 
 initializeSocketIO(io);
 
-app.use("/api/chat", chatRoutes);
+app.use("/api/chats", chatRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/contacts", contactRoutes);

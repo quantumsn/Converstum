@@ -11,6 +11,10 @@ const contactSchema = new Schema(
       type: String,
       required: true,
     },
+    originalId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
     email: {
       type: String,
       required: true,

@@ -13,13 +13,15 @@ export default function Chat() {
 
   useEffect(() => {
     socket.on("msg", (data) => {
-      setMessages((prevMsges) => [...prevMsges, data]);
+      if (data.chatId === roomId) {
+        setMessages((prevMsges) => [...prevMsges, data]);
+      }
     });
 
     return () => {
       socket.off("msg");
     };
-  }, []);
+  }, [roomId]);
 
   useEffect(() => {
     if (roomId != null) {
@@ -29,7 +31,7 @@ export default function Chat() {
           setMessages(res.data);
         })
         .catch((err) => {
-          console.error(err);
+          console.error(err.response.data);
         });
     }
     setMessages([]);
@@ -37,35 +39,37 @@ export default function Chat() {
 
   const sendMsg = async (e) => {
     e.preventDefault();
-    if (msg != "" || msg != null) {
-      socket.emit("msg", {
+
+    try {
+      let msgRes = await api.post(`messages/${roomId}`, {
         content: msg,
         sender: userId,
-        receiver: chatUser._id,
-        roomId,
-        createdAt: new Date().toISOString(),
+        receiver: chatUser.originalId || chatUser._id,
       });
 
-      try {
-        let res = await api.post(`messages/${roomId}`, {
-          content: msg,
-          sender: userId,
-          receiver: chatUser._id,
-        });
-        console.log(res.data);
-      } catch (err) {
-        console.error(err.response.data);
-      }
+      let chatRes = await api.post(`chats/${roomId}`, {
+        participants: [userId, chatUser.originalId || chatUser._id],
+        lastMessage: msgRes.data._id,
+      });
 
-      try {
-        let res = await api.post(`chat/${roomId}`, {
-          participants: [userId, chatUser._id],
-          lastMessage: msg,
-        });
-        console.log(res.data);
-      } catch (err) {
-        console.error(err);
-      }
+      socket.emit("msg", {
+        _id: msgRes.data._id,
+        content: msg,
+        chatId: roomId,
+        sender: userId,
+        receiver: chatUser.originalId || chatUser._id,
+        createdAt: msgRes.data.createdAt,
+        isRead: false,
+      });
+      console.log(chatRes.data);
+      console.log(msgRes.data);
+    } catch (err) {
+      console.error(err.response);
+    }
+
+    try {
+    } catch (err) {
+      console.error(err);
     }
 
     setmsg("");

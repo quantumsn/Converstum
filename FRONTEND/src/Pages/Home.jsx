@@ -1,6 +1,5 @@
 import { Suspense, lazy } from "react";
 const Chat = lazy(() => import("../Layouts/Chat")); // Chat.jsx loaded when it's needed.. okay bro ?
-// import Contacts from "../Layouts/Contacts";
 const Contacts = lazy(() => import("../Layouts/Contacts"));
 import About from "../Layouts/About";
 import { useChatClose } from "../Context/ChatCloseProvidor";

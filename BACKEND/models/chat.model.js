@@ -10,7 +10,8 @@ const chatSchema = new Schema(
     },
     participants: [{ type: Schema.Types.ObjectId, ref: "User" }],
     lastMessage: {
-      type: String,
+      type: Schema.Types.ObjectId,
+      ref: "Message",
     },
   },
   { timestamps: true }
