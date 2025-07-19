@@ -32,8 +32,8 @@ const registerUser = async (req, res) => {
   });
   res.cookie("authToken", token, {
     httpOnly: true,
-    // secure: process.env.NODE_ENV === "production",
-    // sameSite: "None", // Cross-origin
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "None", // Cross-origin
     expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
@@ -55,8 +55,8 @@ const loginUser = async (req, res) => {
       });
       res.cookie("authToken", token, {
         httpOnly: true,
-        // secure: process.env.NODE_ENV === "production",
-        // sameSite: "None", // Cross-origin
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "None", // Cross-origin
         expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });

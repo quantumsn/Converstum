@@ -11,8 +11,8 @@ router.post("/login", wrapAsync(loginUser));
 router.get("/logout", (req, res) => {
   res.clearCookie("authToken", {
     httpOnly: true,
-    // secure: true,
-    // sameSite: "None",
+    secure: true,
+    sameSite: "None",
   });
   res.status(200).send({ message: "Logged out successfully" });
 });
