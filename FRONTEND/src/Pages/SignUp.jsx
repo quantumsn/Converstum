@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import CloseIcon from "@mui/icons-material/Close";
+import CircularProgress from "@mui/material/CircularProgress";
+import Button from "@mui/material/Button";
 import api from "../api";
-// import { useAuth } from "../../contexts/AuthProvidor";
-// import { useFlashMsg } from "../../contexts/FlashMsgProvidor";
+import { useAuth } from "../Context/AuthProvidor";
+import { useFlashMsgContext } from "../Context/FlashMsgProvidor";
+import { FlashMsg } from "../Components";
 
 export default function SignUp() {
   const [userData, setUserData] = useState({
@@ -11,35 +13,30 @@ export default function SignUp() {
     email: "",
     password: "",
   });
-  const [errMsg, setErrMsg] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  //   const { login } = useAuth();
-  //   const { addFlashMsg } = useFlashMsg();
+  const { login } = useAuth();
+  const { flashMsg, setFlashMsg } = useFlashMsgContext();
 
   const handleSumbit = async (e) => {
     e.preventDefault();
-
+    setIsLoading(true);
     try {
       let res = await api.post("/user/register", userData);
-      console.log(res.data.message);
+      login();
+      setFlashMsg({ content: res.data.message, status: "success" });
       navigate("/");
     } catch (err) {
-      console.error(err.response.data.error);
+      setFlashMsg({ content: err.response.data.error, status: "failed" });
+    } finally {
+      setIsLoading(false);
     }
     setUserData({ username: "", email: "", password: "" });
   };
 
   return (
     <div className="flex flex-col items-center px-6 py-8 mx-auto md:h-screen lg:py-4">
-      {/* {errMsg != null && (
-        <div className="md:w-1/3 my-8 flex justify-between bg-red-200 rounded-md p-4">
-          <p className="text-red-900">{errMsg}.</p>
-          <CloseIcon
-            className="text-red-900 cursor-pointer"
-            onClick={() => setErrMsg(null)}
-          />
-        </div>
-      )} */}
+      {flashMsg != null && <FlashMsg flashMsg={flashMsg} />}
       <div className="w-full bg-white rounded-lg shadow md:mt-10 sm:max-w-md xl:p-0 ">
         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
           <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
@@ -51,14 +48,14 @@ export default function SignUp() {
                 htmlFor="userName"
                 className="block mb-2 text-sm font-medium text-gray-900"
               >
-                Your Name
+                Username
               </label>
               <input
                 type="text"
-                name="name"
+                name="username"
                 id="userName"
                 className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5"
-                placeholder="name@company.com"
+                placeholder="quantumsn123"
                 value={userData.username}
                 onChange={(e) =>
                   setUserData((prevData) => ({
@@ -115,12 +112,20 @@ export default function SignUp() {
                 required
               />
             </div>
-            <button
+            <Button
+              disabled={isLoading}
               type="submit"
-              className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center "
+              className="w-full !rounded-lg"
+              startIcon={
+                isLoading ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : null
+              }
+              variant="contained"
+              color="primary"
             >
               Sign Up
-            </button>
+            </Button>
             <p className="text-sm font-light text-gray-500">
               Already have an account ?{" "}
               <Link

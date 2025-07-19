@@ -11,10 +11,18 @@ const sentMessage = async (req, res) => {
   if (existsChat) {
     const message = new Message({ chatId, sender, content, receiver });
     let savedMsg = await message.save();
+
+    (await savedMsg.populate("receiver", "username")).populate(
+      "sender",
+      "username"
+    );
+
     res.status(201).json({
       message: "Message sent successfully",
       _id: savedMsg._id,
       createdAt: savedMsg.createdAt,
+      receiverUsername: savedMsg.receiver.username,
+      senderUsername: savedMsg.sender.username,
     });
   } else {
     throw new CustomError("Chat does not exists", 404);
@@ -25,7 +33,7 @@ const updateMessage = async (req, res) => {
   const { id } = req.params;
   const { isRead } = req.body;
   const updatedMessage = await Message.findByIdAndUpdate(
-    id,
+    { _id: id },
     { isRead },
     { runValidators: true }
   );

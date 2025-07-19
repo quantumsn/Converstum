@@ -1,22 +1,28 @@
 import { useState, useEffect } from "react";
 import api from "../api";
-import { SearchBox, ContactBar } from "../Components";
+import { SearchBox, ContactBar, ContactLoader } from "../Components";
 import AddIcon from "@mui/icons-material/Add";
 import { useChatClose } from "../Context/ChatCloseProvidor";
 import socket from "../socket";
 import { AddContactDialog } from "../Components";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate } from "react-router-dom";
+import { useFlashMsgContext } from "../Context/FlashMsgProvidor";
+import { useAuth } from "../Context/AuthProvidor";
 
 export default function Contacts() {
   const [contacts, setContacts] = useState(null);
   const [addDialog, setaddDialog] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const { openChat, userId, setUserId } = useChatClose();
+  const { openChat, userId, setUserId, chatUser } = useChatClose();
+  const { setFlashMsg } = useFlashMsgContext();
+  const { setIsAuthenticated, login, logout } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const getData = async () => {
+      setLoading(true);
       try {
         let res = await api.get("chats");
 
@@ -25,8 +31,19 @@ export default function Contacts() {
         });
         setContacts(sortedChats);
         setUserId(res.data.user._id);
+
+        login();
       } catch (err) {
-        console.error(err.response.data.error);
+        setFlashMsg({
+          content: err.response.data.error,
+          status: "failed",
+        });
+        if (err.response.status === 401) {
+          setIsAuthenticated(false);
+          navigate("/login");
+        }
+      } finally {
+        setLoading(false);
       }
     };
     getData();
@@ -35,19 +52,38 @@ export default function Contacts() {
   useEffect(() => {
     socket.on("newMsg", (data) => {
       setContacts((prevContacts) => {
-        const updatedContacts = prevContacts.map((contact) => {
-          if (contact.chatId === data.chatId) {
-            return {
-              ...contact,
-              lastMessage: data,
-              updatedAt: data.createdAt,
-            };
-          }
-          return contact;
-        });
-        return updatedContacts.sort(
-          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        const exist = prevContacts.some(
+          (contact) => contact.chatId === data.chatId
         );
+        if (exist) {
+          const updatedContacts = prevContacts.map((contact) => {
+            if (contact.chatId === data.chatId) {
+              return {
+                ...contact,
+                lastMessage: data,
+                updatedAt: data.createdAt,
+              };
+            }
+            return contact;
+          });
+          return updatedContacts.sort(
+            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+          );
+        } else {
+          return [
+            ...prevContacts,
+            {
+              chatId: data.chatId,
+              contact: {
+                username:
+                  userId === data.sender
+                    ? data.receiverUsername
+                    : data.senderUsername,
+              },
+              lastMessage: data.content,
+            },
+          ];
+        }
       });
     });
 
@@ -81,10 +117,17 @@ export default function Contacts() {
   const handleLogout = async () => {
     try {
       let res = await api.get("/user/logout");
+      logout();
       navigate("/login");
-      console.log(res.data);
+      setFlashMsg({
+        content: res.data.message,
+        status: "success",
+      });
     } catch (err) {
-      console.error(err.response.data);
+      setFlashMsg({
+        content: err.response.data.error,
+        status: "failed",
+      });
     }
   };
 
@@ -115,7 +158,14 @@ export default function Contacts() {
         handleClose={() => setaddDialog(false)}
       />
       <div className="flex flex-col gap-4 mt-4">
-        {contacts != null &&
+        {loading ? (
+          <>
+            <ContactLoader key={"0"} />
+            <ContactLoader key={"1"} />
+            <ContactLoader key={"2"} />
+          </>
+        ) : (
+          contacts != null &&
           contacts.map((contact) => (
             <div
               key={contact.contact._id}
@@ -127,7 +177,8 @@ export default function Contacts() {
                 changeIsReadStatus={changeIsReadStatus}
               />
             </div>
-          ))}
+          ))
+        )}
       </div>
     </div>
   );

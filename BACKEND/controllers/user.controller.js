@@ -7,7 +7,21 @@ const registerUser = async (req, res) => {
   const { email, username, password } = req.body;
   const hashedPassword = await hashPassword(password);
 
-  const newUser = new User({ username, email, password: hashedPassword });
+  const existingUser = await User.findOne({
+    $or: [{ username: username.trim() }, { email: email.trim() }],
+  });
+  if (existingUser) {
+    throw new CustomError(
+      "Username or Email already exists, please try another one.",
+      400
+    );
+  }
+
+  const newUser = new User({
+    username: username.trim(),
+    email: email.trim(),
+    password: hashedPassword,
+  });
   const savedUser = await newUser.save();
 
   let payload = { _id: savedUser._id, username: savedUser.username };

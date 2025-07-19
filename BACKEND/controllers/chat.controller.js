@@ -4,7 +4,7 @@ import Contact from "../models/contacts.model.js";
 
 const getChats = async (req, res) => {
   let chats = await Chat.find({ participants: req.user._id })
-    .populate("participants", "username email")
+    .populate("participants", "username email savedContact")
     .populate("lastMessage")
     .select("lastMessage chatId createdAt updatedAt");
 
@@ -25,6 +25,7 @@ const getChats = async (req, res) => {
         contact.username = contact.email;
       } else {
         contact.username = isSavedContact.nickname;
+        contact.savedContact = true;
       }
 
       return {

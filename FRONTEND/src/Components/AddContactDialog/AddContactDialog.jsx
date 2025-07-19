@@ -5,13 +5,31 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import CircularProgress from "@mui/material/CircularProgress";
 import api from "../../api.js";
+import { useFlashMsgContext } from "../../Context/FlashMsgProvidor.jsx";
+import { useChatClose } from "../../Context/ChatCloseProvidor.jsx";
+import { useEffect } from "react";
 
 export default function AddContactDialog({ open, handleClose }) {
+  const [isSaving, setIsSaving] = useState(false);
   const [contactDetails, setContactDetails] = useState({
     nickname: "",
     email: "",
   });
+
+  const { chatUser } = useChatClose();
+
+  useEffect(() => {
+    if (chatUser) {
+      setContactDetails({
+        ...contactDetails,
+        email: chatUser.email || "",
+      });
+    }
+  }, [chatUser]);
+
+  const { setFlashMsg } = useFlashMsgContext();
 
   const handleChange = (e) => {
     setContactDetails((prevDetails) => ({
@@ -21,11 +39,21 @@ export default function AddContactDialog({ open, handleClose }) {
   };
 
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       let res = await api.post("/contacts", contactDetails);
-      console.log(res.data);
-    } catch (error) {
-      console.error("Error saving contact:", error.response.data.error);
+      setFlashMsg({
+        content: res.data.message,
+        status: "success",
+      });
+      chatUser.username = contactDetails.nickname;
+    } catch (err) {
+      setFlashMsg({
+        content: err.response.data.error,
+        status: "failed",
+      });
+    } finally {
+      setIsSaving(false);
     }
     handleClose();
     setContactDetails({ nickname: "", email: "" });
@@ -61,7 +89,15 @@ export default function AddContactDialog({ open, handleClose }) {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained" color="primary">
+        <Button
+          disabled={isSaving}
+          startIcon={
+            isSaving ? <CircularProgress color="inherit" size={20} /> : null
+          }
+          onClick={handleSave}
+          variant="contained"
+          color="primary"
+        >
           Save
         </Button>
       </DialogActions>

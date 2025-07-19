@@ -53,6 +53,8 @@ const initializeSocketIO = (io) => {
         receiver: data.receiver,
         createdAt: data.createdAt,
         isRead: data.isRead,
+        receiverUsername: data.receiverUsername,
+        senderUsername: data.senderUsername,
       });
     });
 

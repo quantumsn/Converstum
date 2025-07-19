@@ -1,15 +1,19 @@
-import { ChatHeader, ChatBody, InputBox } from "../Components";
+import { ChatHeader, ChatBody, InputBox, Loader } from "../Components";
 import { useState } from "react";
 import socket from "../socket";
 import { useEffect } from "react";
 import { useChatClose } from "../Context/ChatCloseProvidor";
 import api from "../api";
+import { useFlashMsgContext } from "../Context/FlashMsgProvidor";
 
 export default function Chat() {
   const [msg, setmsg] = useState("");
   const [messages, setMessages] = useState([]);
+  const [isSending, setIsSending] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   let { roomId, userId, chatUser } = useChatClose();
+  let { setFlashMsg } = useFlashMsgContext();
 
   useEffect(() => {
     socket.on("msg", (data) => {
@@ -25,13 +29,21 @@ export default function Chat() {
 
   useEffect(() => {
     if (roomId != null) {
+      setLoading(true);
+
       api
         .get(`messages/${roomId}`)
         .then((res) => {
           setMessages(res.data);
         })
         .catch((err) => {
-          console.error(err.response.data);
+          setFlashMsg({
+            content: err.response.data.error,
+            status: "failed",
+          });
+        })
+        .finally(() => {
+          setLoading(false);
         });
     }
     setMessages([]);
@@ -39,7 +51,8 @@ export default function Chat() {
 
   const sendMsg = async (e) => {
     e.preventDefault();
-
+    if (msg.trim() === "") return;
+    setIsSending(true);
     try {
       let msgRes = await api.post(`messages/${roomId}`, {
         content: msg,
@@ -60,16 +73,16 @@ export default function Chat() {
         receiver: chatUser.originalId || chatUser._id,
         createdAt: msgRes.data.createdAt,
         isRead: false,
+        receiverUsername: msgRes.data.receiverUsername,
+        senderUsername: msgRes.data.senderUsername,
       });
-      console.log(chatRes.data);
-      console.log(msgRes.data);
     } catch (err) {
-      console.error(err.response);
-    }
-
-    try {
-    } catch (err) {
-      console.error(err);
+      setFlashMsg({
+        content: err.response.data.error,
+        status: "failed",
+      });
+    } finally {
+      setIsSending(false);
     }
 
     setmsg("");
@@ -78,11 +91,19 @@ export default function Chat() {
   return (
     <div className="h-screen w-4/6 flex flex-col bg-gradient-to-r from-blue-800 via-gray-950 to-purple-800 text-white">
       <ChatHeader />
-      <ChatBody chatMessages={messages} socketId={socket.id} />
+
+      {loading ? (
+        <div className="flex items-center justify-center h-screen">
+          <Loader />
+        </div>
+      ) : (
+        <ChatBody chatMessages={messages} socketId={socket.id} />
+      )}
       <InputBox
         msg={msg}
         handleMsgInputBox={(msg) => setmsg(msg)}
         sendMsg={sendMsg}
+        isSending={isSending}
       />
     </div>
   );

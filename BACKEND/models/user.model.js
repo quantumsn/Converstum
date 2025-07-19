@@ -17,6 +17,10 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    savedContact: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

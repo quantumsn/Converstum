@@ -16,6 +16,7 @@ export default function ContactBar({ username, lastMsg, changeIsReadStatus }) {
   const messageSeen = async (id) => {
     try {
       const res = await api.put(`messages/${id}/edit`, { isRead: true });
+      // console.log(res.data);
     } catch (err) {
       console.log(err.response.data.error);
     }
