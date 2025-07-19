@@ -12,10 +12,8 @@ const sentMessage = async (req, res) => {
     const message = new Message({ chatId, sender, content, receiver });
     let savedMsg = await message.save();
 
-    (await savedMsg.populate("receiver", "username")).populate(
-      "sender",
-      "username"
-    );
+    await savedMsg.populate("sender", "username");
+    await savedMsg.populate("receiver", "username");
 
     res.status(201).json({
       message: "Message sent successfully",
