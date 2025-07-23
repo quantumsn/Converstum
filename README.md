@@ -121,9 +121,3 @@ If you like this project, **⭐ star this repo** to support my work! ❤️
 This project is licensed under the **MIT License** – feel free to use and modify.
 
 ---
-
-**Made with ❤️ by \ Quantumsn**
-
-```
-
----
